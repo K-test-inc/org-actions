@@ -6,6 +6,9 @@ on:
       message:
         required: true
         type: string
+      enabled:
+        required: false
+        type: boolean
     secrets:
       TEAMS_WEBHOOK_URL:
         required: true
@@ -13,11 +16,11 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
+    if: ${{ inputs.enabled != false }}
     steps:
       - name: Send Teams notification
-        steps:
-          - name: Send Teams notifications
-            run: |
-              curl -H "Content-Type: application/json" \
-                   -d "{\"text\": \"${{ inputs.message }}\"}" \
-                   "${{ secrets.TEAMS_WEBHOOK_URL }}"
+        run: |
+          echo "Sending message: ${{ inputs.message }}"
+          curl -H "Content-Type: application/json" \
+               -d "{\"text\": \"${{ inputs.message }}\"}" \
+               "${{ secrets.TEAMS_WEBHOOK_URL }}"
