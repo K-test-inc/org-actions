@@ -1,0 +1,23 @@
+name: Central Notify
+
+on:
+  workflow_call:
+    inputs:
+      message:
+        required: true
+        type: string
+    secrets:
+      TEAMS_WEBHOOK_URL:
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Teams notification
+        steps:
+          - name: Send Teams notifications
+            run: |
+              curl -H "Content-Type: application/json" \
+                   -d "{\"text\": \"${{ inputs.message }}\"}" \
+                   "${{ secrets.TEAMS_WEBHOOK_URL }}"
