@@ -10,9 +10,9 @@ on:
         required: false
         type: boolean
     secrets:
-      # All channels for all Teams
+      # All channels for all teams
       TEAMS_WEBHOOKS_JSON:
-        required: true  # org-secret with JSON
+        required: true
 
 jobs:
   notify:
@@ -23,17 +23,14 @@ jobs:
         run: |
           echo "Message: ${{ inputs.message }}"
           
-          # Secrets saves as JSON: {"DEV":"url_1","QA":"url_2","TEST":"url_3"}
           CHANNELS_JSON="${{ secrets.TEAMS_WEBHOOKS_JSON }}"
           
-          for key in $(echo $CHANNELS_JSON | jq -r 'keys[]'); do
-            url=$(echo $CHANNELS_JSON | jq -r ".\"$key\"")
+          echo "$CHANNELS_JSON" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read key url; do
             echo "Sending to $key: $url"
             curl -H "Content-Type: application/json" \
                  -d "{\"text\": \"${{ inputs.message }}\"}" \
                  "$url"
           done
-
 
 ## Add secrets:
 # Secret name: TEAMS_WEBHOOKS_JSON
