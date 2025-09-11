@@ -10,17 +10,55 @@ on:
         required: false
         type: boolean
     secrets:
-      TEAMS_WEBHOOK_URL:
-        required: true
+      # All channels for all Teams
+      TEAMS_WEBHOOKS_JSON:
+        required: true  # org-secret with JSON
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     if: ${{ inputs.enabled != false }}
     steps:
-      - name: Send Teams notification
+      - name: Parse channels and send notifications
         run: |
-          echo "Sending message: ${{ inputs.message }}"
-          curl -H "Content-Type: application/json" \
-               -d "{\"text\": \"${{ inputs.message }}\"}" \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}"
+          echo "Message: ${{ inputs.message }}"
+          
+          # Secrets saves as JSON: {"DEV":"url_1","QA":"url_2","TEST":"url_3"}
+          CHANNELS_JSON="${{ secrets.TEAMS_WEBHOOKS_JSON }}"
+          
+          for key in $(echo $CHANNELS_JSON | jq -r 'keys[]'); do
+            url=$(echo $CHANNELS_JSON | jq -r ".\"$key\"")
+            echo "Sending to $key: $url"
+            curl -H "Content-Type: application/json" \
+                 -d "{\"text\": \"${{ inputs.message }}\"}" \
+                 "$url"
+          done
+
+
+
+# name: Central Notify
+
+# on:
+#   workflow_call:
+#     inputs:
+#       message:
+#         required: true
+#         type: string
+#       enabled:
+#         required: false
+#         type: boolean
+#     secrets:
+#       TEAMS_WEBHOOK_URL:
+#         required: true
+
+# jobs:
+#   notify:
+#     runs-on: ubuntu-latest
+#     if: ${{ inputs.enabled != false }}
+#     steps:
+#       - name: Send Teams notification
+#         run: |
+#           echo "Sending message: ${{ inputs.message }}"
+#           curl -H "Content-Type: application/json" \
+#                -d "{\"text\": \"${{ inputs.message }}\"}" \
+#                "${{ secrets.TEAMS_WEBHOOK_URL }}"
