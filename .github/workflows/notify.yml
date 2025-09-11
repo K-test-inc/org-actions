@@ -1,3 +1,4 @@
+##### Notifications with filter
 name: Central Notify
 
 on:
@@ -18,7 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.enabled != false }}
     steps:
+      - name: Skip demo/test releases
+        if: contains(inputs.message, 'demo') || contains(inputs.message, 'test')
+        run: |
+          echo "Skipping notification for demo/test release: ${{ inputs.message }}"
+
       - name: Parse channels and send notifications
+        if: ${{ !contains(inputs.message, 'demo') && !contains(inputs.message, 'test') }}
         run: |
           echo "Message: ${{ inputs.message }}"
 
@@ -30,17 +37,50 @@ jobs:
                    -d "{\"text\": \"${{ inputs.message }}\"}" \
                    "$url"
             done
+########################################################
+##### Notifications for differents teams################
 
-## Add secrets:
+# name: Central Notify
+
+# on:
+#   workflow_call:
+#     inputs:
+#       message:
+#         required: true
+#         type: string
+#       enabled:
+#         required: false
+#         type: boolean
+#     secrets:
+#       TEAMS_WEBHOOKS_JSON:
+#         required: true
+
+# jobs:
+#   notify:
+#     runs-on: ubuntu-latest
+#     if: ${{ inputs.enabled != false }}
+#     steps:
+#       - name: Parse channels and send notifications
+#         run: |
+#           echo "Message: ${{ inputs.message }}"
+
+#           echo '${{ secrets.TEAMS_WEBHOOKS_JSON }}' \
+#           | jq -r 'to_entries[] | "\(.key) \(.value)"' \
+#           | while read key url; do
+#               echo "Sending to $key: $url"
+#               curl -H "Content-Type: application/json" \
+#                    -d "{\"text\": \"${{ inputs.message }}\"}" \
+#                    "$url"
+#             done
+
+###Add secrets:
 # Secret name: TEAMS_WEBHOOKS_JSON
 # Value: 
-# {
-#   "DEV": "https://outlook.office.com/webhook/xxx",
-#   "QA": "https://outlook.office.com/webhook/yyy",
-#   "TEST": "https://outlook.office.com/webhook/zzz"
-# }
+# {"DEV":"https://outlook.office.com/webhook/xxx","QA": "https://outlook.office.com/webhook/yyy",}
+############ in JSON format without spaces and with regular quotes ####
 
-
+########################################################
+######## Using webhooks for each repo ##########
 # name: Central Notify
 
 # on:
