@@ -10,7 +10,6 @@ on:
         required: false
         type: boolean
     secrets:
-      # All channels for all teams
       TEAMS_WEBHOOKS_JSON:
         required: true
 
@@ -22,10 +21,8 @@ jobs:
       - name: Parse channels and send notifications
         run: |
           echo "Message: ${{ inputs.message }}"
-          
-          CHANNELS_JSON="${{ secrets.TEAMS_WEBHOOKS_JSON }}"
-          
-          echo "$CHANNELS_JSON" | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read key url; do
+
+          echo "${{ secrets.TEAMS_WEBHOOKS_JSON }}" | jq -R 'fromjson | to_entries[] | "\(.key) \(.value)"' | while read key url; do
             echo "Sending to $key: $url"
             curl -H "Content-Type: application/json" \
                  -d "{\"text\": \"${{ inputs.message }}\"}" \
