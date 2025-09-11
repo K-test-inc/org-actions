@@ -20,12 +20,12 @@ jobs:
     if: ${{ inputs.enabled != false }}
     steps:
       - name: Skip demo/test releases
-        if: ${{ inputs.message =~ '.*(demo|test).*' }}
+        if: ${{ contains(inputs.message, 'demo') || contains(inputs.message, 'test') }}
         run: |
           echo "Skipping notification for demo/test release: ${{ inputs.message }}"
 
       - name: Parse channels and send notifications
-        if: ${{ !(inputs.message =~ '.*(demo|test).*') }}
+        if: ${{ !(contains(inputs.message, 'demo') || contains(inputs.message, 'test')) }}
         run: |
           echo "Message: ${{ inputs.message }}"
 
