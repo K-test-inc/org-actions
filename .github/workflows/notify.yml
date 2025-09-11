@@ -1,4 +1,4 @@
-##### Notifications with filter
+##### Notifications with filter demo
 name: Central Notify
 
 on:
@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.enabled != false }}
     steps:
-      - name: Skip demo/test releases
+      - name: Skip demo releases
         if: ${{ contains(inputs.message, 'demo') }}
         run: |
           echo "Skipping notification for demo release: ${{ inputs.message }}"
 
       - name: Parse channels and send notifications
-        if: ${{ !(contains(inputs.message, 'demo') }}
+        if: ${{ !contains(inputs.message, 'demo') }}
         run: |
           echo "Message: ${{ inputs.message }}"
 
