@@ -20,7 +20,7 @@ jobs:
     if: ${{ inputs.enabled != false }}
     steps:
       - name: Skip demo/test releases
-        if: contains(inputs.message, 'demo') || contains(inputs.message, 'test')
+        if: ${{ contains(inputs.message, 'demo') || contains(inputs.message, 'test') }}
         run: |
           echo "Skipping notification for demo/test release: ${{ inputs.message }}"
 
