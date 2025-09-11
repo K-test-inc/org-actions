@@ -22,7 +22,7 @@ jobs:
         run: |
           echo "Message: ${{ inputs.message }}"
 
-          echo ${{ secrets.TEAMS_WEBHOOKS_JSON }} | jq -R 'fromjson | to_entries[] | "\(.key) \(.value)"' | while read key url; do
+          echo '${{ secrets.TEAMS_WEBHOOKS_JSON }}' | jq -R 'fromjson | to_entries[] | "\(.key) \(.value)"' | while read key url; do
             echo "Sending to $key: $url"
             curl -H "Content-Type: application/json" \
                  -d "{\"text\": \"${{ inputs.message }}\"}" \
