@@ -35,6 +35,15 @@ jobs:
           done
 
 
+## Add secrets:
+# Secret name: TEAMS_WEBHOOKS_JSON
+# Value: 
+# {
+#   "DEV": "https://outlook.office.com/webhook/xxx",
+#   "QA": "https://outlook.office.com/webhook/yyy",
+#   "TEST": "https://outlook.office.com/webhook/zzz"
+# }
+
 
 # name: Central Notify
 
