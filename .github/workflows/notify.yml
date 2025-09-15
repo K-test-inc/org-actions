@@ -93,7 +93,9 @@ jobs:
 #         required: false
 #         type: boolean
 #     secrets:
-#       TEAMS_WEBHOOK_URL:
+#       TEAMS_DEV_WEBHOOK:
+#         required: true
+#       TEAMS_QA_WEBHOOK:
 #         required: true
 
 # jobs:
@@ -101,9 +103,16 @@ jobs:
 #     runs-on: ubuntu-latest
 #     if: ${{ inputs.enabled != false }}
 #     steps:
-#       - name: Send Teams notification
+#       - name: Send Teams notification to Dev team
 #         run: |
-#           echo "Sending message: ${{ inputs.message }}"
+#           echo "Sending message to Dev: ${{ inputs.message }}"
 #           curl -H "Content-Type: application/json" \
 #                -d "{\"text\": \"${{ inputs.message }}\"}" \
-#                "${{ secrets.TEAMS_WEBHOOK_URL }}"
+#                "${{ secrets.TEAMS_DEV_WEBHOOK }}"
+
+#       - name: Send Teams notification to QA team
+#         run: |
+#           echo "Sending message to QA: ${{ inputs.message }}"
+#           curl -H "Content-Type: application/json" \
+#                -d "{\"text\": \"${{ inputs.message }}\"}" \
+#                "${{ secrets.TEAMS_QA_WEBHOOK }}"
