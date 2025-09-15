@@ -118,3 +118,9 @@ jobs:
           curl -H "Content-Type: application/json" \
                -d "{\"text\": \"[QA Notification] ${{ inputs.message }}\"}" \
                "${{ secrets.TEAMS_QA_WEBHOOK }}"
+      - name: Fallback - ensure at least one channel gets message
+        run: |
+          echo "Message was skipped for both Dev and QA, sending fallback to Dev"
+          curl -H "Content-Type: application/json" \
+               -d "{\"text\": \"[Fallback to Dev] ${{ inputs.message }}\"}" \
+               "${{ secrets.TEAMS_DEV_WEBHOOK }}"
