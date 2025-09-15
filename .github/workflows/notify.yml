@@ -103,16 +103,18 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.enabled != false }}
     steps:
-      - name: Send Teams notification to Dev team
+      - name: Send Teams notification to Dev team (skip qa-tagged)
+        if: ${{ !contains(inputs.message, 'qa') }}
         run: |
-          echo "Sending message to Dev: ${{ inputs.message }}"
+          echo "Sending to Dev channel: ${{ inputs.message }}"
           curl -H "Content-Type: application/json" \
-               -d "{\"text\": \"${{ inputs.message }}\"}" \
+               -d "{\"text\": \"[Dev Notification] ${{ inputs.message }}\"}" \
                "${{ secrets.TEAMS_DEV_WEBHOOK }}"
 
-      - name: Send Teams notification to QA team
+      - name: Send Teams notification to QA team (skip release-tagged)
+        if: ${{ !contains(inputs.message, 'release') }}
         run: |
-          echo "Sending message to QA: ${{ inputs.message }}"
+          echo "Sending to QA channel: ${{ inputs.message }}"
           curl -H "Content-Type: application/json" \
-               -d "{\"text\": \"${{ inputs.message }}\"}" \
+               -d "{\"text\": \"[QA Notification] ${{ inputs.message }}\"}" \
                "${{ secrets.TEAMS_QA_WEBHOOK }}"
