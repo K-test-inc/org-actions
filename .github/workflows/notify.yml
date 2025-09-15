@@ -1,42 +1,42 @@
 ##### Notifications with filter demo
-name: Central Notify
+# name: Central Notify
 
-on:
-  workflow_call:
-    inputs:
-      message:
-        required: true
-        type: string
-      enabled:
-        required: false
-        type: boolean
-    secrets:
-      TEAMS_WEBHOOKS_JSON:
-        required: true
+# on:
+#   workflow_call:
+#     inputs:
+#       message:
+#         required: true
+#         type: string
+#       enabled:
+#         required: false
+#         type: boolean
+#     secrets:
+#       TEAMS_WEBHOOKS_JSON:
+#         required: true
 
-jobs:
-  notify:
-    runs-on: ubuntu-latest
-    if: ${{ inputs.enabled != false }}
-    steps:
-      - name: Skip demo releases
-        if: ${{ contains(inputs.message, 'demo') }}
-        run: |
-          echo "Skipping notification for demo release: ${{ inputs.message }}"
+# jobs:
+#   notify:
+#     runs-on: ubuntu-latest
+#     if: ${{ inputs.enabled != false }}
+#     steps:
+#       - name: Skip demo releases
+#         if: ${{ contains(inputs.message, 'demo') }}
+#         run: |
+#           echo "Skipping notification for demo release: ${{ inputs.message }}"
 
-      - name: Parse channels and send notifications
-        if: ${{ !contains(inputs.message, 'demo') }}
-        run: |
-          echo "Message: ${{ inputs.message }}"
+#       - name: Parse channels and send notifications
+#         if: ${{ !contains(inputs.message, 'demo') }}
+#         run: |
+#           echo "Message: ${{ inputs.message }}"
 
-          echo '${{ secrets.TEAMS_WEBHOOKS_JSON }}' \
-          | jq -r 'to_entries[] | "\(.key) \(.value)"' \
-          | while read key url; do
-              echo "Sending to $key: $url"
-              curl -H "Content-Type: application/json" \
-                   -d "{\"text\": \"${{ inputs.message }}\"}" \
-                   "$url"
-            done
+#           echo '${{ secrets.TEAMS_WEBHOOKS_JSON }}' \
+#           | jq -r 'to_entries[] | "\(.key) \(.value)"' \
+#           | while read key url; do
+#               echo "Sending to $key: $url"
+#               curl -H "Content-Type: application/json" \
+#                    -d "{\"text\": \"${{ inputs.message }}\"}" \
+#                    "$url"
+#             done
 ########################################################
 ##### Notifications for differents teams################
 
@@ -81,38 +81,38 @@ jobs:
 
 ########################################################
 ######## Using webhooks for each repo ##########
-# name: Central Notify
+name: Central Notify
 
-# on:
-#   workflow_call:
-#     inputs:
-#       message:
-#         required: true
-#         type: string
-#       enabled:
-#         required: false
-#         type: boolean
-#     secrets:
-#       TEAMS_DEV_WEBHOOK:
-#         required: true
-#       TEAMS_QA_WEBHOOK:
-#         required: true
+on:
+  workflow_call:
+    inputs:
+      message:
+        required: true
+        type: string
+      enabled:
+        required: false
+        type: boolean
+    secrets:
+      TEAMS_DEV_WEBHOOK:
+        required: true
+      TEAMS_QA_WEBHOOK:
+        required: true
 
-# jobs:
-#   notify:
-#     runs-on: ubuntu-latest
-#     if: ${{ inputs.enabled != false }}
-#     steps:
-#       - name: Send Teams notification to Dev team
-#         run: |
-#           echo "Sending message to Dev: ${{ inputs.message }}"
-#           curl -H "Content-Type: application/json" \
-#                -d "{\"text\": \"${{ inputs.message }}\"}" \
-#                "${{ secrets.TEAMS_DEV_WEBHOOK }}"
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.enabled != false }}
+    steps:
+      - name: Send Teams notification to Dev team
+        run: |
+          echo "Sending message to Dev: ${{ inputs.message }}"
+          curl -H "Content-Type: application/json" \
+               -d "{\"text\": \"${{ inputs.message }}\"}" \
+               "${{ secrets.TEAMS_DEV_WEBHOOK }}"
 
-#       - name: Send Teams notification to QA team
-#         run: |
-#           echo "Sending message to QA: ${{ inputs.message }}"
-#           curl -H "Content-Type: application/json" \
-#                -d "{\"text\": \"${{ inputs.message }}\"}" \
-#                "${{ secrets.TEAMS_QA_WEBHOOK }}"
+      - name: Send Teams notification to QA team
+        run: |
+          echo "Sending message to QA: ${{ inputs.message }}"
+          curl -H "Content-Type: application/json" \
+               -d "{\"text\": \"${{ inputs.message }}\"}" \
+               "${{ secrets.TEAMS_QA_WEBHOOK }}"
