@@ -141,9 +141,11 @@ on:
         required: false
         type: string    # comma-separated list, e.g. "dev,qa"
     secrets:
-      TEAMS_DEV_WEBHOOK:
-        required: true
-      TEAMS_QA_WEBHOOK:
+      # TEAMS_DEV_WEBHOOK:
+      #   required: true
+      # TEAMS_QA_WEBHOOK:
+      #   required: true
+      TEAMS_WEBHOOKS_JSON:
         required: true
 
 jobs:
