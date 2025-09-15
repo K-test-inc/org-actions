@@ -79,8 +79,53 @@
 # {"DEV":"https://outlook.office.com/webhook/xxx","QA": "https://outlook.office.com/webhook/yyy",}
 ############ in JSON format without spaces and with regular quotes ####
 
-########################################################
+############message filter#########################
 ######## Using webhooks for each repo ##########
+# name: Central Notify
+
+# on:
+#   workflow_call:
+#     inputs:
+#       message:
+#         required: true
+#         type: string
+#       enabled:
+#         required: false
+#         type: boolean
+#     secrets:
+#       TEAMS_DEV_WEBHOOK:
+#         required: true
+#       TEAMS_QA_WEBHOOK:
+#         required: true
+
+# jobs:
+#   notify:
+#     runs-on: ubuntu-latest
+#     if: ${{ inputs.enabled != false }}
+#     steps:
+#       - name: Send Teams notification to Dev team (skip qa-tagged)
+#         if: ${{ !contains(inputs.message, 'qa') }}
+#         run: |
+#           echo "Sending to Dev channel: ${{ inputs.message }}"
+#           curl -H "Content-Type: application/json" \
+#                -d "{\"text\": \"[Dev Notification] ${{ inputs.message }}\"}" \
+#                "${{ secrets.TEAMS_DEV_WEBHOOK }}"
+
+#       - name: Send Teams notification to QA team (skip release-tagged)
+#         if: ${{ !contains(inputs.message, 'release') }}
+#         run: |
+#           echo "Sending to QA channel: ${{ inputs.message }}"
+#           curl -H "Content-Type: application/json" \
+#                -d "{\"text\": \"[QA Notification] ${{ inputs.message }}\"}" \
+#                "${{ secrets.TEAMS_QA_WEBHOOK }}"
+#       - name: Fallback - ensure at least one channel gets message
+#         run: |
+#           echo "Message was skipped for both Dev and QA, sending fallback to Dev"
+#           curl -H "Content-Type: application/json" \
+#                -d "{\"text\": \"[Fallback to Dev] ${{ inputs.message }}\"}" \
+#                "${{ secrets.TEAMS_DEV_WEBHOOK }}"
+##########################################
+#####recipients filter#######
 name: Central Notify
 
 on:
@@ -92,6 +137,9 @@ on:
       enabled:
         required: false
         type: boolean
+      recipients:
+        required: false
+        type: string    # comma-separated list, e.g. "dev,qa"
     secrets:
       TEAMS_DEV_WEBHOOK:
         required: true
@@ -103,24 +151,21 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.enabled != false }}
     steps:
-      - name: Send Teams notification to Dev team (skip qa-tagged)
-        if: ${{ !contains(inputs.message, 'qa') }}
+      - name: Debug — show inputs
         run: |
-          echo "Sending to Dev channel: ${{ inputs.message }}"
-          curl -H "Content-Type: application/json" \
-               -d "{\"text\": \"[Dev Notification] ${{ inputs.message }}\"}" \
+          echo "message=${{ inputs.message }}"
+          echo "recipients=${{ inputs.recipients }}"
+
+      - name: Send to Dev
+        if: ${{ contains(inputs.recipients, 'dev') }}
+        run: |
+          curl -s -H "Content-Type: application/json" \
+               -d "{\"text\": \"[DEV] ${{ inputs.message }}\"}" \
                "${{ secrets.TEAMS_DEV_WEBHOOK }}"
 
-      - name: Send Teams notification to QA team (skip release-tagged)
-        if: ${{ !contains(inputs.message, 'release') }}
+      - name: Send to QA
+        if: ${{ contains(inputs.recipients, 'qa') }}
         run: |
-          echo "Sending to QA channel: ${{ inputs.message }}"
-          curl -H "Content-Type: application/json" \
-               -d "{\"text\": \"[QA Notification] ${{ inputs.message }}\"}" \
+          curl -s -H "Content-Type: application/json" \
+               -d "{\"text\": \"[QA] ${{ inputs.message }}\"}" \
                "${{ secrets.TEAMS_QA_WEBHOOK }}"
-      - name: Fallback - ensure at least one channel gets message
-        run: |
-          echo "Message was skipped for both Dev and QA, sending fallback to Dev"
-          curl -H "Content-Type: application/json" \
-               -d "{\"text\": \"[Fallback to Dev] ${{ inputs.message }}\"}" \
-               "${{ secrets.TEAMS_DEV_WEBHOOK }}"
