@@ -153,21 +153,33 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.enabled != false }}
     steps:
-      - name: Debug — show inputs
-        run: |
-          echo "message=${{ inputs.message }}"
-          echo "recipients=${{ inputs.recipients }}"
+      # - name: Debug — show inputs
+      #   run: |
+      #     echo "message=${{ inputs.message }}"
+      #     echo "recipients=${{ inputs.recipients }}"
 
-      - name: Send to Dev
-        if: ${{ contains(inputs.recipients, 'dev') }}
-        run: |
-          curl -s -H "Content-Type: application/json" \
-               -d "{\"text\": \"[DEV] ${{ inputs.message }}\"}" \
-               "${{ secrets.TEAMS_DEV_WEBHOOK }}"
+      # - name: Send to Dev
+      #   if: ${{ contains(inputs.recipients, 'dev') }}
+      #   run: |
+      #     curl -s -H "Content-Type: application/json" \
+      #          -d "{\"text\": \"[DEV] ${{ inputs.message }}\"}" \
+      #          "${{ secrets.TEAMS_DEV_WEBHOOK }}"
 
-      - name: Send to QA
-        if: ${{ contains(inputs.recipients, 'qa') }}
+      # - name: Send to QA
+      #   if: ${{ contains(inputs.recipients, 'qa') }}
+      #   run: |
+      #     curl -s -H "Content-Type: application/json" \
+      #          -d "{\"text\": \"[QA] ${{ inputs.message }}\"}" \
+      #          "${{ secrets.TEAMS_QA_WEBHOOK }}"
+      - name: Send notifications
         run: |
-          curl -s -H "Content-Type: application/json" \
-               -d "{\"text\": \"[QA] ${{ inputs.message }}\"}" \
-               "${{ secrets.TEAMS_QA_WEBHOOK }}"
+          echo '${{ secrets.TEAMS_WEBHOOKS_JSON }}' \
+          | jq -r 'to_entries[] | "\(.key) \(.value)"' \
+          | while read team url; do
+              if [[ "${{ inputs.recipients }}" == *"${team,,}"* ]]; then
+                echo "Sending to $team: $url"
+                curl -s -H "Content-Type: application/json" \
+                     -d "{\"text\": \"[$team] ${{ inputs.message }}\"}" \
+                     "$url"
+              fi
+            done
